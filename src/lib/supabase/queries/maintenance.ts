@@ -47,7 +47,12 @@ export async function dbCreateMaintenanceRecord(
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    if (error.code === '23503') {
+      throw new Error('Seçilen ekipman bulunamadı. Lütfen listeden geçerli bir ekipman seçin.');
+    }
+    throw new Error(error.message);
+  }
 
   // Reset equipment health counter after service
   await supabase

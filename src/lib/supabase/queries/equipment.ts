@@ -97,7 +97,17 @@ export async function dbCreateEquipment(
     .insert(row)
     .select()
     .single();
-  if (error) throw error;
+  if (error) {
+    if (error.code === '23505') {
+      if (error.message.includes('serial_number')) {
+        throw new Error('Bu seri numarası zaten kayıtlı. Lütfen farklı bir seri numarası girin.');
+      }
+      if (error.message.includes('equipment_pkey') || error.message.includes('_id_')) {
+        throw new Error('ID çakışması oluştu. Lütfen tekrar deneyin.');
+      }
+    }
+    throw new Error(error.message);
+  }
   return mapEquipment(data);
 }
 

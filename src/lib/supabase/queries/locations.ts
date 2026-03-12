@@ -86,6 +86,11 @@ export async function dbCreateLocation(
     .insert(row)
     .select()
     .single();
-  if (error) throw error;
+  if (error) {
+    if (error.code === '23505') {
+      throw new Error('Bu isimde bir konum zaten mevcut. Lütfen farklı bir isim deneyin.');
+    }
+    throw new Error(error.message);
+  }
   return { ...mapLocation(data), equipmentIds: [] };
 }
