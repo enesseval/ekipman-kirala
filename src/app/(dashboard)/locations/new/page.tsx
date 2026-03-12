@@ -30,16 +30,39 @@ export default function NewLocationPage() {
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const isValid = name && address && contactName;
 
   const handleSave = async () => {
     if (!isValid) return;
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => router.push('/locations'), 1200);
+    setError(null);
+    try {
+      const { createLocation } = await import('@/lib/data/locations');
+      await createLocation({
+        name,
+        venueType,
+        address,
+        city,
+        country: 'Türkiye',
+        lat: null,
+        lng: null,
+        contactName,
+        contactEmail,
+        contactPhone,
+        activeEventId: null,
+        startDate: null,
+        endDate: null,
+        notes,
+      });
+      setSaving(false);
+      setSaved(true);
+      setTimeout(() => router.push('/locations'), 1200);
+    } catch (err) {
+      setSaving(false);
+      setError(err instanceof Error ? err.message : 'Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+    }
   };
 
   return (
@@ -166,6 +189,13 @@ export default function NewLocationPage() {
               className="input-field w-full resize-none"
             />
           </div>
+
+          {/* Error */}
+          {error && (
+            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex items-center gap-3 pt-2 border-t border-stone-800">

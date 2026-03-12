@@ -1,11 +1,14 @@
+'use client';
+
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import TopBar from '@/components/layout/TopBar';
 import EquipmentTable from '@/components/inventory/EquipmentTable';
-import { getEquipment } from '@/lib/data/equipment';
+import { useRealtimeEquipment } from '@/hooks/useRealtimeEquipment';
 
 export default function InventoryPage() {
-  const equipment = getEquipment();
+  const { equipment, loading } = useRealtimeEquipment();
+
   const espressoCount = equipment.filter((e) => e.type === 'espresso_machine').length;
   const grinderCount = equipment.filter((e) => e.type === 'grinder').length;
 
@@ -13,7 +16,7 @@ export default function InventoryPage() {
     <div className="flex flex-col min-h-full">
       <TopBar
         title="Ekipman Envanteri"
-        subtitle={`${espressoCount} espresso makinesi · ${grinderCount} öğütücü`}
+        subtitle={loading ? 'Yükleniyor...' : `${espressoCount} espresso makinesi · ${grinderCount} öğütücü`}
       />
 
       <div className="flex-1 p-6">

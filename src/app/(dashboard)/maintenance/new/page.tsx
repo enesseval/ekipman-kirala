@@ -29,6 +29,7 @@ function NewMaintenancePageContent() {
   const [cost, setCost] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const selectedEquipment = allEquipment.find((e) => e.id === equipmentId);
   const isValid = equipmentId && performedBy && description && cost;
@@ -36,6 +37,7 @@ function NewMaintenancePageContent() {
   const handleSave = async () => {
     if (!isValid) return;
     setSaving(true);
+    setError(null);
     try {
       const { createMaintenanceRecord } = await import('@/lib/data/maintenance');
       const eq = allEquipment.find((e) => e.id === equipmentId);
@@ -49,10 +51,13 @@ function NewMaintenancePageContent() {
         cost: Math.round(Number(cost) * 100),
         nextServiceAt: (eq?.cupsServiceThreshold ?? 5000),
       });
-    } catch { /* fallback: navigate anyway */ }
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => router.push('/maintenance'), 1200);
+      setSaving(false);
+      setSaved(true);
+      setTimeout(() => router.push('/maintenance'), 1200);
+    } catch (err) {
+      setSaving(false);
+      setError(err instanceof Error ? err.message : 'Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+    }
   };
 
   return (
@@ -191,6 +196,13 @@ function NewMaintenancePageContent() {
               />
             </div>
           </div>
+
+          {/* Error */}
+          {error && (
+            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex items-center gap-3 pt-2 border-t border-stone-800">

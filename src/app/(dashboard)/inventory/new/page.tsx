@@ -41,6 +41,7 @@ export default function NewEquipmentPage() {
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const brands = type === 'espresso_machine' ? ESPRESSO_BRANDS : GRINDER_BRANDS;
   const selectedBrand = brands.find((b) => b.brand === brand);
@@ -55,6 +56,7 @@ export default function NewEquipmentPage() {
   const handleSave = async () => {
     if (!brand || !model || !serialNumber) return;
     setSaving(true);
+    setError(null);
     try {
       const { createEquipment } = await import('@/lib/data/equipment');
       await createEquipment({
@@ -75,10 +77,13 @@ export default function NewEquipmentPage() {
         notes,
         imageUrl: null,
       });
-    } catch { /* fallback: navigate anyway */ }
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => router.push('/inventory'), 1200);
+      setSaving(false);
+      setSaved(true);
+      setTimeout(() => router.push('/inventory'), 1200);
+    } catch (err) {
+      setSaving(false);
+      setError(err instanceof Error ? err.message : 'Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+    }
   };
 
   const isValid = brand && model && serialNumber;
@@ -237,6 +242,13 @@ export default function NewEquipmentPage() {
               className="input-field w-full resize-none"
             />
           </div>
+
+          {/* Error */}
+          {error && (
+            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex items-center gap-3 pt-2 border-t border-stone-800">
