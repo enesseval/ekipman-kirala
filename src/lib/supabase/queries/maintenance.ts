@@ -15,6 +15,16 @@ function mapRecord(row: Record<string, unknown>): MaintenanceRecord {
   };
 }
 
+export async function dbGetAllMaintenanceRecords(): Promise<MaintenanceRecord[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('maintenance_records')
+    .select('*')
+    .order('performed_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(mapRecord);
+}
+
 export async function dbGetMaintenanceByEquipment(equipmentId: string): Promise<MaintenanceRecord[]> {
   const supabase = createClient();
   const { data, error } = await supabase

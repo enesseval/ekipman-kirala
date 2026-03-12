@@ -6,26 +6,27 @@ import { Plus } from 'lucide-react';
 import TopBar from '@/components/layout/TopBar';
 import LocationCard from '@/components/locations/LocationCard';
 import LocationSheet from '@/components/locations/LocationSheet';
-import { getLocations } from '@/lib/data/locations';
+import { useRealtimeLocations } from '@/hooks/useRealtimeLocations';
+import { useRealtimeEquipment } from '@/hooks/useRealtimeEquipment';
 import { getEventById } from '@/lib/data/events';
-import { mockEquipment } from '@/lib/mock';
 import type { Location, Event, Equipment } from '@/lib/types';
 
 export default function LocationsPage() {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
 
-  const locations = getLocations();
+  const { locations, loading } = useRealtimeLocations();
+  const { equipment } = useRealtimeEquipment();
 
   const activeLocations = locations.filter(
     (l) => l.venueType !== 'other' && l.equipmentIds.length > 0
   );
   const storageLocations = locations.filter((l) => l.venueType === 'other');
-  const deployedCount = mockEquipment.filter((e) => e.status === 'rented').length;
+  const deployedCount = equipment.filter((e) => e.status === 'rented').length;
 
-  // Resolve machines for a location
+  // Resolve machines for a location from live equipment list
   const getMachines = (loc: Location): Equipment[] =>
     loc.equipmentIds
-      .map((id) => mockEquipment.find((e) => e.id === id))
+      .map((id) => equipment.find((e) => e.id === id))
       .filter((e): e is Equipment => e !== undefined);
 
   // Resolve active event for a location
@@ -39,7 +40,7 @@ export default function LocationsPage() {
     <div className="flex flex-col min-h-full">
       <TopBar
         title="Konum Haritası"
-        subtitle={`${activeLocations.length} aktif konum · ${deployedCount} ekipman konuşlandırıldı`}
+        subtitle={loading ? 'Yükleniyor...' : `${activeLocations.length} aktif konum · ${deployedCount} ekipman konuşlandırıldı`}
       />
 
       <div className="flex-1 p-6 space-y-8">
@@ -60,17 +61,49 @@ export default function LocationsPage() {
               Yeni Konum
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {activeLocations.map((location) => (
-              <LocationCard
-                key={location.id}
-                location={location}
-                machines={getMachines(location)}
-                onClick={() => handleOpen(location)}
-              />
-            ))}
-          </div>
+          {activeLocations.length === 0 && !loading ? (
+            <div className="text-center py-12 text-stone-500 text-sm">
+              Henüz ekipman konuşlandırılmış aktif konum yok.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {activeLocations.map((location) => (
+                <LocationCard
+                  key={location.id}
+                  location={location}
+                  machines={getMachines(location)}
+                  onClick={() => handleOpen(location)}
+                />
+              ))}
+            </div>
+          )}
         </section>
+
+        {/* All other locations (non-active, no equipment yet) */}
+        {locations.filter((l) => l.venueType !== 'other' && l.equipmentIds.length === 0).length > 0 && (
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="font-display font-semibold text-base text-stone-100">
+                Diğer Konumlar
+              </h2>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-stone-800 text-stone-400 border border-stone-700 font-medium">
+                {locations.filter((l) => l.venueType !== 'other' && l.equipmentIds.length === 0).length} konum
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {locations
+                .filter((l) => l.venueType !== 'other' && l.equipmentIds.length === 0)
+                .map((location) => (
+                  <LocationCard
+                    key={location.id}
+                    location={location}
+                    machines={[]}
+                    onClick={() => handleOpen(location)}
+                  />
+                ))}
+            </div>
+          </section>
+        )}
 
         {/* Storage / warehouse */}
         <section>

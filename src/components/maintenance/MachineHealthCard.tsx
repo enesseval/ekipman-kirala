@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Coffee, Wind, Calendar, Activity, Wrench, MapPin } from 'lucide-react';
 import type { Equipment } from '@/lib/types';
 import HealthStatusBar from './HealthStatusBar';
@@ -108,9 +109,10 @@ export default function MachineHealthCard({ equipment }: MachineHealthCardProps)
 
       {/* Schedule service button for red/yellow */}
       {(equipment.healthStatus === 'red' || equipment.healthStatus === 'yellow') && (
-        <button
+        <Link
+          href={`/maintenance/new?equipmentId=${equipment.id}`}
           className={cn(
-            'w-full py-2 rounded-lg text-xs font-medium border transition-all',
+            'w-full py-2 rounded-lg text-xs font-medium border transition-all text-center block',
             equipment.healthStatus === 'red'
               ? 'bg-red-500/10 border-red-500/30 text-red-300 hover:bg-red-500/20'
               : 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
@@ -118,7 +120,7 @@ export default function MachineHealthCard({ equipment }: MachineHealthCardProps)
         >
           <Wrench size={11} className="inline mr-1.5" />
           {equipment.healthStatus === 'red' ? 'ACİL Bakım Planla' : 'Bakım Planla'}
-        </button>
+        </Link>
       )}
     </div>
   );

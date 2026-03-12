@@ -2,6 +2,17 @@ import type { MaintenanceRecord } from '@/lib/types';
 import { mockMaintenanceRecords } from '@/lib/mock';
 import { parseISO } from 'date-fns';
 
+export async function fetchAllMaintenanceRecords(): Promise<MaintenanceRecord[]> {
+  try {
+    const { dbGetAllMaintenanceRecords } = await import('@/lib/supabase/queries/maintenance');
+    return await dbGetAllMaintenanceRecords();
+  } catch {
+    return [...mockMaintenanceRecords].sort(
+      (a, b) => parseISO(b.performedAt).getTime() - parseISO(a.performedAt).getTime()
+    );
+  }
+}
+
 export async function fetchMaintenanceByEquipment(equipmentId: string): Promise<MaintenanceRecord[]> {
   try {
     const { dbGetMaintenanceByEquipment } = await import('@/lib/supabase/queries/maintenance');
