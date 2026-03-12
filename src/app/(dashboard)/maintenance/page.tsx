@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, Wrench, CheckCircle2, Clock } from 'lucide-react';
+import Link from 'next/link';
+import { AlertTriangle, Wrench, CheckCircle2, Clock, Plus } from 'lucide-react';
 import TopBar from '@/components/layout/TopBar';
 import MachineHealthCard from '@/components/maintenance/MachineHealthCard';
 import { getEquipment } from '@/lib/data/equipment';
@@ -109,7 +110,8 @@ export default function MaintenancePage() {
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs + CTA */}
+        <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-1 bg-stone-900 border border-stone-800 rounded-xl p-1 w-fit">
           {tabs.map((tab) => (
             <button
@@ -136,6 +138,11 @@ export default function MaintenancePage() {
               </span>
             </button>
           ))}
+        </div>
+        <Link href="/maintenance/new" className="btn-primary flex items-center gap-2">
+          <Plus size={14} />
+          Bakım Kaydı Ekle
+        </Link>
         </div>
 
         {/* Cards grid */}

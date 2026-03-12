@@ -19,6 +19,7 @@ import { EVENT_TYPE_LABELS } from '@/lib/constants';
 interface LocationCardProps {
   location: Location;
   machines: Equipment[];
+  onClick?: () => void;
 }
 
 const VENUE_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
@@ -57,7 +58,7 @@ const VENUE_COLORS: Record<string, { border: string; icon: string; badge: string
   },
 };
 
-export default function LocationCard({ location, machines }: LocationCardProps) {
+export default function LocationCard({ location, machines, onClick }: LocationCardProps) {
   const isActive = location.activeEventId !== null;
   const colors = VENUE_COLORS[location.venueType] ?? VENUE_COLORS.other;
   const VenueIcon = VENUE_ICONS[location.venueType] ?? Package;
@@ -68,10 +69,12 @@ export default function LocationCard({ location, machines }: LocationCardProps) 
 
   return (
     <div
+      onClick={onClick}
       className={cn(
-        'card flex flex-col gap-4 p-5 border-l-4 hover:border-stone-700 transition-all duration-200 animate-slide-up',
+        'card flex flex-col gap-4 p-5 border-l-4 transition-all duration-200 animate-slide-up',
         colors.border,
-        isActive && !isWarehouse ? 'ring-1 ring-amber-500/20' : ''
+        isActive && !isWarehouse ? 'ring-1 ring-amber-500/20' : '',
+        onClick ? 'cursor-pointer hover:border-stone-600 hover:scale-[1.01]' : 'hover:border-stone-700'
       )}
     >
       {/* Header */}

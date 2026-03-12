@@ -8,7 +8,10 @@
       "Bash(netstat -ano)",
       "Bash(taskkill /PID 18992 /F)",
       "Bash(cmd.exe /c \"taskkill /PID 18992 /F\")",
-      "Bash(\"/c/Users/Enes/Desktop/ekipman-kirala/.gitignore\":*)"
+      "Bash(\"/c/Users/Enes/Desktop/ekipman-kirala/.gitignore\":*)",
+      "Bash(ls \"/c/Users/Enes/Desktop/ekipman-kirala/src/app/\\(dashboard\\)/inventory/\")",
+      "Bash(ls \"/c/Users/Enes/Desktop/ekipman-kirala/src/app/\\(dashboard\\)/locations/\")",
+      "Bash(npm install @supabase/supabase-js)"
     ]
   }
 }

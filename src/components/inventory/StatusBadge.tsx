@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils/cn';
 
 interface StatusBadgeProps {
   status: EquipmentStatus;
-  size?: 'sm' | 'md';
+  size?: 'xs' | 'sm' | 'md';
 }
 
 const STATUS_CONFIG: Record<
@@ -34,11 +34,11 @@ export default function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
     <span
       className={cn(
         'inline-flex items-center gap-1.5 font-medium border rounded-full',
-        size === 'sm' ? 'text-[10px] px-2 py-0.5' : 'text-xs px-2.5 py-1',
+        size === 'xs' ? 'text-[9px] px-1.5 py-0.5' : size === 'sm' ? 'text-[10px] px-2 py-0.5' : 'text-xs px-2.5 py-1',
         config.className
       )}
     >
-      <span className={cn('rounded-full flex-shrink-0', config.dotColor, size === 'sm' ? 'w-1.5 h-1.5' : 'w-2 h-2')} />
+      <span className={cn('rounded-full flex-shrink-0', config.dotColor, size === 'xs' ? 'w-1 h-1' : size === 'sm' ? 'w-1.5 h-1.5' : 'w-2 h-2')} />
       {config.label}
     </span>
   );

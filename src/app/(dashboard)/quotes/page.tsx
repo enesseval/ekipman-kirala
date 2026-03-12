@@ -13,9 +13,10 @@ import {
   Coffee,
   Wind,
   Sparkles,
+  RefreshCw,
 } from 'lucide-react';
 import TopBar from '@/components/layout/TopBar';
-import { getQuotes } from '@/lib/data/quotes';
+import { useRealtimeQuotes } from '@/hooks/useRealtimeQuotes';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
 import { QUOTE_STATUS_LABELS } from '@/lib/constants';
 import { cn } from '@/lib/utils/cn';
@@ -34,7 +35,7 @@ const STATUS_CONFIG: Record<
 
 export default function QuotesPage() {
   const [filter, setFilter] = useState<QuoteStatus | 'all'>('all');
-  const quotes = getQuotes();
+  const { quotes, loading } = useRealtimeQuotes();
 
   const filtered = filter === 'all' ? quotes : quotes.filter((q) => q.status === filter);
 
@@ -58,7 +59,7 @@ export default function QuotesPage() {
     <div className="flex flex-col min-h-full">
       <TopBar
         title="Teklifler"
-        subtitle={`${formatCurrency(totalAccepted)} onaylanan gelir`}
+        subtitle={`${formatCurrency(totalAccepted)} onaylanan gelir${loading ? ' · yükleniyor...' : ''}`}
       />
 
       <div className="flex-1 p-6 space-y-5">

@@ -1,6 +1,38 @@
 import type { Equipment, EquipmentStatus, EquipmentType, HealthBreakdown } from '@/lib/types';
 import { mockEquipment } from '@/lib/mock';
 
+// ─── Async Supabase versions ──────────────────────────────────────────────────
+
+export async function fetchEquipment(): Promise<Equipment[]> {
+  try {
+    const { dbGetEquipment } = await import('@/lib/supabase/queries/equipment');
+    return await dbGetEquipment();
+  } catch {
+    return mockEquipment;
+  }
+}
+
+export async function fetchEquipmentById(id: string): Promise<Equipment | null> {
+  try {
+    const { dbGetEquipmentById } = await import('@/lib/supabase/queries/equipment');
+    return await dbGetEquipmentById(id);
+  } catch {
+    return mockEquipment.find((e) => e.id === id) ?? null;
+  }
+}
+
+export async function createEquipment(
+  input: Omit<Equipment, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<Equipment> {
+  const { dbCreateEquipment } = await import('@/lib/supabase/queries/equipment');
+  return dbCreateEquipment(input);
+}
+
+export async function updateEquipmentStatus(id: string, status: EquipmentStatus): Promise<void> {
+  const { dbUpdateEquipmentStatus } = await import('@/lib/supabase/queries/equipment');
+  return dbUpdateEquipmentStatus(id, status);
+}
+
 export function getEquipment(): Equipment[] {
   return mockEquipment;
 }
