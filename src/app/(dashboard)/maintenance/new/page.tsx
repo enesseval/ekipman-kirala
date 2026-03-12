@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Wrench, Save } from 'lucide-react';
@@ -13,7 +13,7 @@ import type { MaintenanceRecord } from '@/lib/types';
 
 const SERVICE_TYPES = Object.entries(MAINTENANCE_SERVICE_LABELS) as [MaintenanceRecord['serviceType'], string][];
 
-export default function NewMaintenancePage() {
+function NewMaintenancePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedId = searchParams.get('equipmentId') ?? '';
@@ -211,5 +211,17 @@ export default function NewMaintenancePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function NewMaintenancePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex-1 p-6 flex items-center justify-center text-stone-500">
+        Yükleniyor...
+      </div>
+    }>
+      <NewMaintenancePageContent />
+    </Suspense>
   );
 }
