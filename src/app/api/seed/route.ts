@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
-import { mockEquipment, mockLocations, mockEvents, mockQuotes, mockMaintenance } from '@/lib/mock';
+import { mockEquipment, mockLocations, mockEvents, mockQuotes, mockMaintenanceRecords } from '@/lib/mock';
 
 // POST /api/seed  — run once to populate Supabase with mock data
 // Protected: only works in development or with SEED_SECRET header
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
     }
 
     // ── 5. Maintenance records ───────────────────────────────────────────────
-    const maintRows = mockMaintenance.map((m) => ({
+    const maintRows = mockMaintenanceRecords.map((m) => ({
       id: m.id,
       equipment_id: m.equipmentId,
       service_type: m.serviceType,
