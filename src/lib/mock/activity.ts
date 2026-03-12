@@ -1,0 +1,68 @@
+import type { ActivityItem } from '@/lib/types';
+
+export const mockActivity: ActivityItem[] = [
+  {
+    id: 'ACT-001',
+    type: 'event_created',
+    description: 'Yeni etkinlik oluşturuldu: Boğaziçi Kariyer Günleri 2026',
+    entityId: 'EVT-011',
+    entityName: 'Boğaziçi Kariyer Günleri 2026',
+    timestamp: '2026-03-01T09:15:00Z',
+  },
+  {
+    id: 'ACT-002',
+    type: 'maintenance_done',
+    description: 'Bakım tamamlandı: Mahlkönig EK43 S #30',
+    entityId: 'GR-030',
+    entityName: 'Mahlkönig EK43 S #30',
+    timestamp: '2026-02-25T11:30:00Z',
+  },
+  {
+    id: 'ACT-003',
+    type: 'quote_sent',
+    description: 'Teklif gönderildi: Hande & Emre Düğünü (3.120 ₺)',
+    entityId: 'QT-2026-0012',
+    entityName: 'QT-2026-0012',
+    timestamp: '2026-02-20T14:00:00Z',
+  },
+  {
+    id: 'ACT-004',
+    type: 'equipment_rented',
+    description: '4 ekipman kiralandı: Google Türkiye — Maslak Ofis',
+    entityId: 'EVT-007',
+    entityName: 'Google Türkiye Ofis Kahvesi',
+    timestamp: '2026-02-15T08:00:00Z',
+  },
+  {
+    id: 'ACT-005',
+    type: 'event_completed',
+    description: 'Etkinlik tamamlandı: TechTalk İstanbul — Ocak 2026',
+    entityId: 'EVT-013',
+    entityName: 'TechTalk İstanbul',
+    timestamp: '2026-01-22T18:00:00Z',
+  },
+  {
+    id: 'ACT-006',
+    type: 'maintenance_done',
+    description: 'Bakım tamamlandı: La Marzocco Linea PB #9',
+    entityId: 'EM-009',
+    entityName: 'La Marzocco Linea PB #9',
+    timestamp: '2026-01-08T10:00:00Z',
+  },
+  {
+    id: 'ACT-007',
+    type: 'equipment_returned',
+    description: '3 ekipman depoya iade edildi: Kış Kahve Festivali',
+    entityId: 'EVT-015',
+    entityName: 'Kış Kahve Festivali',
+    timestamp: '2026-02-23T16:00:00Z',
+  },
+  {
+    id: 'ACT-008',
+    type: 'quote_sent',
+    description: 'Teklif gönderildi: İzmir Coffee Festival 2026 (7.425 ₺)',
+    entityId: 'QT-2026-0010',
+    entityName: 'QT-2026-0010',
+    timestamp: '2026-03-01T11:00:00Z',
+  },
+];
