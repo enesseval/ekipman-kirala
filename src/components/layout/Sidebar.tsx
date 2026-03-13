@@ -173,16 +173,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </button>
         ) : (
           <>
-            <Link
-              href="#"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-stone-500 hover:text-stone-300 hover:bg-stone-800/50 transition-all"
-            >
-              <Layers size={16} />
-              <span>Faz 2: Supabase</span>
-              <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-stone-800 text-stone-500 font-mono">
-                Yakında
-              </span>
-            </Link>
+            
             <Link
               href="#"
               className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-stone-500 hover:text-stone-300 hover:bg-stone-800/50 transition-all"

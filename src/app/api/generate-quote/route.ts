@@ -84,7 +84,7 @@ Yanıt formatı (SADECE geçerli JSON, başka hiçbir şey yazma):
   const genAI = new GoogleGenerativeAI(apiKey);
 
   // Try models in order, fall back on quota/not-found errors
-  const modelNames = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash-latest'];
+  const modelNames = ['gemini-3-flash-preview', 'gemini-1.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash-latest'];
 
   for (const modelName of modelNames) {
     try {
