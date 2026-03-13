@@ -6,21 +6,21 @@ import {
   FileText,
   Plus,
   CheckCircle2,
-  Clock,
   Send,
   XCircle,
   AlertCircle,
   Coffee,
   Wind,
   Sparkles,
-  RefreshCw,
+  ChevronRight,
 } from 'lucide-react';
 import TopBar from '@/components/layout/TopBar';
+import QuoteDetailModal from '@/components/quotes/QuoteDetailModal';
 import { useRealtimeQuotes } from '@/hooks/useRealtimeQuotes';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
 import { QUOTE_STATUS_LABELS } from '@/lib/constants';
 import { cn } from '@/lib/utils/cn';
-import type { QuoteStatus } from '@/lib/types';
+import type { Quote, QuoteStatus } from '@/lib/types';
 
 const STATUS_CONFIG: Record<
   QuoteStatus,
@@ -35,6 +35,7 @@ const STATUS_CONFIG: Record<
 
 export default function QuotesPage() {
   const [filter, setFilter] = useState<QuoteStatus | 'all'>('all');
+  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
   const { quotes, loading } = useRealtimeQuotes();
 
   const filtered = filter === 'all' ? quotes : quotes.filter((q) => q.status === filter);
@@ -96,10 +97,11 @@ export default function QuotesPage() {
             const grinderItems = quote.lineItems.filter((li) => li.equipmentType === 'grinder');
 
             return (
-              <div
+              <button
                 key={quote.id}
+                onClick={() => setSelectedQuote(quote)}
                 className={cn(
-                  'card p-5 flex items-start gap-5 hover:border-stone-700 transition-all duration-200 animate-slide-up',
+                  'card p-5 flex items-start gap-5 hover:border-stone-700 transition-all duration-200 animate-slide-up w-full text-left',
                   quote.status === 'accepted' && 'ring-1 ring-emerald-500/15'
                 )}
                 style={{ animationDelay: `${i * 30}ms` }}
@@ -159,21 +161,22 @@ export default function QuotesPage() {
                   </div>
                 </div>
 
-                {/* Amount + date */}
-                <div className="text-right flex-shrink-0">
+                {/* Amount + date + chevron */}
+                <div className="text-right flex-shrink-0 flex flex-col items-end gap-1">
                   <p className="font-display font-bold text-base text-stone-100">
                     {formatCurrency(quote.total)}
                   </p>
-                  <p className="text-xs text-stone-500 mt-0.5">
+                  <p className="text-xs text-stone-500">
                     {formatDate(quote.createdAt)}
                   </p>
                   {quote.validUntil && quote.status === 'sent' && (
-                    <p className="text-[10px] text-amber-400 mt-1">
+                    <p className="text-[10px] text-amber-400">
                       Geçerlilik: {formatDate(quote.validUntil)}
                     </p>
                   )}
+                  <ChevronRight size={14} className="text-stone-600 mt-1" />
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -185,6 +188,13 @@ export default function QuotesPage() {
           </div>
         )}
       </div>
+
+      {selectedQuote && (
+        <QuoteDetailModal
+          quote={selectedQuote}
+          onClose={() => setSelectedQuote(null)}
+        />
+      )}
     </div>
   );
 }

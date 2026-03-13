@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 
-const MODEL_NAMES = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash-latest'];
+const MODEL_NAMES = ['gemini-2.5-flash-preview', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b'];
 
 const SYSTEM_INSTRUCTION = `Sen BrewOps şirketinin satış asistanısın. Teklif metinlerini kullanıcının talimatlarına göre güncellersin.
 
