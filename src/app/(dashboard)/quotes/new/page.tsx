@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Coffee,
   Wind,
@@ -8,14 +9,16 @@ import {
   Minus,
   Trash2,
   FileText,
-  Download,
   Check,
   Search,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import TopBar from '@/components/layout/TopBar';
-import { getAvailableEquipment } from '@/lib/data/equipment';
-import { formatCurrency, formatDate, formatNumber } from '@/lib/utils/format';
+import QuoteProposalModal from '@/components/quotes/QuoteProposalModal';
+import { useRealtimeEquipment } from '@/hooks/useRealtimeEquipment';
+import { createQuote } from '@/lib/data/quotes';
+import { formatCurrency, formatDate } from '@/lib/utils/format';
 import { cn } from '@/lib/utils/cn';
 import type { Equipment, QuoteLineItem } from '@/lib/types';
 
@@ -36,6 +39,7 @@ function createLineItem(equipment: Equipment): QuoteLineItem {
 }
 
 export default function NewQuotePage() {
+  const router = useRouter();
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
   const [clientPhone, setClientPhone] = useState('');
@@ -45,9 +49,13 @@ export default function NewQuotePage() {
   const [typeFilter, setTypeFilter] = useState<'all' | 'espresso_machine' | 'grinder'>('all');
   const [taxRate] = useState(0.20);
   const [discount, setDiscount] = useState(0);
-  const [saved, setSaved] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [generatingProposal, setGeneratingProposal] = useState(false);
+  const [proposalText, setProposalText] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const availableEquipment = getAvailableEquipment();
+  const { equipment } = useRealtimeEquipment();
+  const availableEquipment = equipment.filter((e) => e.status === 'available');
 
   const filteredEquipment = useMemo(() => {
     let items = availableEquipment;
@@ -91,12 +99,78 @@ export default function NewQuotePage() {
   const taxAmount = Math.round(afterDiscount * taxRate);
   const total = afterDiscount + taxAmount;
 
-  const quoteNumber = `QT-2026-${String(Math.floor(Math.random() * 900) + 100).padStart(4, '0')}`;
+  const quoteNumber = `QT-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 900) + 100).padStart(4, '0')}`;
   const today = new Date().toISOString().split('T')[0];
 
-  function handleSave() {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const canGenerate = (clientName.trim() || eventName.trim()) && lineItems.length > 0;
+
+  async function handleGenerateProposal() {
+    if (!canGenerate || generatingProposal) return;
+    setGeneratingProposal(true);
+    try {
+      const res = await fetch('/api/generate-quote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientName: clientName || eventName,
+          eventName,
+          clientPhone,
+          clientEmail,
+          lineItems,
+          subtotalKurus: subtotal,
+          discountPercent: discount,
+          taxAmountKurus: taxAmount,
+          totalKurus: total,
+        }),
+      });
+      const data = await res.json();
+      if (data.text) {
+        setProposalText(data.text);
+        setModalOpen(true);
+      } else {
+        alert(data.error ?? 'Teklif oluşturulamadı.');
+      }
+    } catch {
+      alert('Sunucu hatası. Lütfen tekrar deneyin.');
+    } finally {
+      setGeneratingProposal(false);
+    }
+  }
+
+  function handleOpenModal() {
+    setModalOpen(true);
+  }
+
+  async function handleSaveQuote(text: string, isAI: boolean) {
+    setSaving(true);
+    const validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0];
+    try {
+      await createQuote({
+        quoteNumber,
+        status: 'draft',
+        clientName: clientName || eventName || 'Belirtilmedi',
+        clientEmail,
+        clientPhone,
+        eventId: null,
+        lineItems,
+        subtotal,
+        taxRate,
+        taxAmount,
+        discountAmount,
+        total,
+        validUntil,
+        notes: text,
+        generatedByAI: isAI,
+      });
+      router.push('/quotes');
+    } catch (err) {
+      console.error('Quote save error:', err);
+      alert('Teklif kaydedilemedi. Lütfen tekrar deneyin.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -393,7 +467,6 @@ export default function NewQuotePage() {
                   </div>
                 )}
 
-                {/* Footer note */}
                 {lineItems.length > 0 && (
                   <p className="text-[10px] text-stone-600 border-t border-stone-700/50 pt-3 leading-relaxed">
                     Bu teklif, ekipman kurulum ve nakliyesi dahil hazırlanmıştır. KDV dahil fiyatlar
@@ -404,39 +477,85 @@ export default function NewQuotePage() {
             </div>
 
             {/* Action buttons */}
-            <div className="p-4 border-t border-stone-800 flex gap-2">
+            <div className="p-4 border-t border-stone-800 space-y-2">
+              {/* AI generate button */}
               <button
-                onClick={handleSave}
+                onClick={handleGenerateProposal}
+                disabled={!canGenerate || generatingProposal}
+                title={!canGenerate ? 'Müşteri adı ve en az 1 ekipman gerekli' : undefined}
                 className={cn(
-                  'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium border transition-all',
-                  saved
-                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                    : 'bg-stone-800 border-stone-700 text-stone-300 hover:bg-stone-700'
+                  'w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all',
+                  canGenerate && !generatingProposal
+                    ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500 shadow-lg shadow-violet-900/30'
+                    : 'bg-stone-800/60 border border-stone-800 text-stone-500 cursor-not-allowed'
                 )}
               >
-                {saved ? (
-                  <>
-                    <Check size={14} />
-                    Kaydedildi!
-                  </>
+                {generatingProposal ? (
+                  <Loader2 size={14} className="animate-spin" />
                 ) : (
-                  <>
-                    <FileText size={14} />
-                    Taslak Kaydet
-                  </>
+                  <Sparkles size={14} />
                 )}
+                {generatingProposal ? 'Teklif Oluşturuluyor...' : 'AI ile Teklif Oluştur'}
               </button>
-              <button
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium bg-amber-500 text-stone-950 hover:bg-amber-400 transition-all"
-                disabled={lineItems.length === 0}
-              >
-                <Download size={14} />
-                PDF İndir
-              </button>
+
+              <div className="flex gap-2">
+                {/* Quick save without AI */}
+                <button
+                  onClick={() => handleSaveQuote('', false)}
+                  disabled={lineItems.length === 0 || saving}
+                  className={cn(
+                    'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium border transition-all',
+                    lineItems.length === 0 || saving
+                      ? 'bg-stone-800/50 border-stone-800 text-stone-600 cursor-not-allowed'
+                      : 'bg-stone-800 border-stone-700 text-stone-300 hover:bg-stone-700'
+                  )}
+                >
+                  {saving ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
+                  Taslak Kaydet
+                </button>
+
+                {/* Open modal for manual edit + PDF */}
+                <button
+                  onClick={handleOpenModal}
+                  disabled={lineItems.length === 0}
+                  className={cn(
+                    'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all',
+                    lineItems.length === 0
+                      ? 'bg-amber-500/30 text-stone-500 cursor-not-allowed'
+                      : 'bg-amber-500 text-stone-950 hover:bg-amber-400'
+                  )}
+                >
+                  <FileText size={14} />
+                  Düzenle & PDF
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* AI Proposal Modal */}
+      {modalOpen && (
+        <QuoteProposalModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSave={handleSaveQuote}
+          initialText={proposalText}
+          quoteData={{
+            clientName: clientName || eventName,
+            eventName,
+            clientEmail,
+            clientPhone,
+            lineItems,
+            subtotalKurus: subtotal,
+            discountPercent: discount,
+            discountAmountKurus: discountAmount,
+            taxAmountKurus: taxAmount,
+            totalKurus: total,
+            quoteNumber,
+          }}
+        />
+      )}
     </div>
   );
 }
