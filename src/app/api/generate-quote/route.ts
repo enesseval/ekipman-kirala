@@ -83,8 +83,8 @@ Yanıt formatı (SADECE geçerli JSON, başka hiçbir şey yazma):
 
   const genAI = new GoogleGenerativeAI(apiKey);
 
-  // Try gemini-2.0-flash first, fall back to gemini-1.5-flash
-  const modelNames = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-latest'];
+  // Try models in order, fall back on quota/not-found errors
+  const modelNames = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash-latest'];
 
   for (const modelName of modelNames) {
     try {
@@ -122,8 +122,15 @@ ZORUNLU KURAL: Yanıtını SADECE geçerli JSON formatında ver. Başka hiçbir 
 
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      // If it's a model not found error, try next model
-      if (message.includes('not found') || message.includes('404') || message.includes('deprecated')) {
+      // Try next model on quota/not-found/deprecated errors
+      if (
+        message.includes('not found') ||
+        message.includes('404') ||
+        message.includes('deprecated') ||
+        message.includes('429') ||
+        message.includes('quota') ||
+        message.includes('Too Many Requests')
+      ) {
         continue;
       }
       // Other errors: return immediately
