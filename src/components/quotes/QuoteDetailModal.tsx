@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
+import { printQuote } from '@/lib/utils/print-quote';
 import { QUOTE_STATUS_LABELS } from '@/lib/constants';
 import type { Quote, QuoteStatus } from '@/lib/types';
 
@@ -57,7 +58,21 @@ export default function QuoteDetailModal({ quote, onClose }: QuoteDetailModalPro
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => window.print()}
+                onClick={() => printQuote({
+                  quoteNumber: quote.quoteNumber,
+                  createdAt: quote.createdAt,
+                  validUntil,
+                  clientName: quote.clientName,
+                  clientEmail: quote.clientEmail,
+                  clientPhone: quote.clientPhone,
+                  proposalText: quote.notes,
+                  lineItems: quote.lineItems,
+                  subtotal: quote.subtotal,
+                  discountAmount: quote.discountAmount,
+                  taxRate: quote.taxRate,
+                  taxAmount: quote.taxAmount,
+                  total: quote.total,
+                })}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-stone-800 border border-stone-700 text-stone-300 hover:bg-stone-700 transition-all"
               >
                 <Printer size={13} />
@@ -181,64 +196,6 @@ export default function QuoteDetailModal({ quote, onClose }: QuoteDetailModalPro
         </div>
       </div>
 
-      {/* Print template for this quote */}
-      <div id="proposal-print-root" aria-hidden="true">
-        <div className="proposal-print-page">
-          <div className="proposal-header">
-            <div>
-              <h1>BrewOps</h1>
-              <p>Premium Ekipman Kiralama · Teknik Destek · Barista Hizmetleri</p>
-            </div>
-            <div className="proposal-meta">
-              <p><strong>{quote.quoteNumber}</strong></p>
-              <p>Tarih: {formatDate(quote.createdAt)}</p>
-              <p>Geçerlilik: {formatDate(validUntil)}</p>
-            </div>
-          </div>
-          <div className="proposal-client">
-            <p className="proposal-label">SAYIN</p>
-            <p className="proposal-client-name">{quote.clientName || '—'}</p>
-            {quote.clientEmail && <p>{quote.clientEmail}</p>}
-            {quote.clientPhone && <p>{quote.clientPhone}</p>}
-          </div>
-          {quote.notes && (
-            <div className="proposal-body">
-              {quote.notes.split('\n').filter(Boolean).map((line, i) => <p key={i}>{line}</p>)}
-            </div>
-          )}
-          <div className="proposal-table-section">
-            <p className="proposal-label">EKİPMAN VE FİYAT LİSTESİ</p>
-            <table className="proposal-table">
-              <thead>
-                <tr><th>Ekipman</th><th>Tür</th><th>Gün</th><th>Birim Fiyat</th><th>Toplam</th></tr>
-              </thead>
-              <tbody>
-                {quote.lineItems.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.equipmentName}</td>
-                    <td>{item.equipmentType === 'espresso_machine' ? 'Espresso Makinesi' : 'Kahve Öğütücü'}</td>
-                    <td>{item.days}</td>
-                    <td>{formatCurrency(item.dailyRate)}/gün</td>
-                    <td><strong>{formatCurrency(item.subtotal)}</strong></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="proposal-totals">
-              <div className="proposal-total-row"><span>Ara Toplam</span><span>{formatCurrency(quote.subtotal)}</span></div>
-              {quote.discountAmount > 0 && (
-                <div className="proposal-total-row"><span>İndirim</span><span>−{formatCurrency(quote.discountAmount)}</span></div>
-              )}
-              <div className="proposal-total-row"><span>KDV (%{Math.round((quote.taxRate ?? 0.2) * 100)})</span><span>{formatCurrency(quote.taxAmount)}</span></div>
-              <div className="proposal-total-row proposal-grand-total"><span>GENEL TOPLAM</span><span>{formatCurrency(quote.total)}</span></div>
-            </div>
-          </div>
-          <div className="proposal-footer">
-            <p>BrewOps Ekipman Kiralama — Bu teklif {formatDate(validUntil)} tarihine kadar geçerlidir.</p>
-            <p>info@brewops.com · +90 (212) 555 01 01 · www.brewops.com</p>
-          </div>
-        </div>
-      </div>
     </>
   );
 }
